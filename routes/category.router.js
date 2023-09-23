@@ -2,34 +2,41 @@ const categoryRouter = require("express").Router();
 require("dotenv").config();
 const { CategoryModel } = require("../models/category.model");
 const { authorize } = require("../middlewares/authorization.middleware");
+const { authentication } = require("../middlewares/authentication.middleware");
 
-categoryRouter.post("/add-category", authorize(["Admin"]), async (req, res) => {
-  try {
-    const { name, description } = req.body;
+categoryRouter.post(
+  "/add-category",
+  authentication,
+  authorize(["Admin"]),
+  async (req, res) => {
+    try {
+      const { name, description } = req.body;
 
-    const category = await CategoryModel.findOne({ name });
+      const category = await CategoryModel.findOne({ name });
 
-    if (category)
-      return res.status(409).json({ message: "Category already exists." });
+      if (category)
+        return res.status(409).json({ message: "Category already exists." });
 
-    const newCategory = new CategoryModel({
-      name,
-      description,
-    });
+      const newCategory = new CategoryModel({
+        name,
+        description,
+      });
 
-    await newCategory.save();
+      await newCategory.save();
 
-    res.status(201).json({ message: "Category added." });
-  } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ error: "Something went wrong. Please try again later." });
+      res.status(201).json({ message: "Category added." });
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ error: "Something went wrong. Please try again later." });
+    }
   }
-});
+);
 
 categoryRouter.post(
   "/add-categories",
+  authentication,
   authorize(["Admin"]),
   async (req, res) => {
     try {

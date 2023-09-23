@@ -6,6 +6,7 @@ const { userRouter } = require("./routes/user.router");
 const { categoryRouter } = require("./routes/category.router");
 const { productRouter } = require("./routes/product.router");
 const { cartRouter } = require("./routes/cart.router");
+const { orderRouter } = require("./routes/order.router");
 const { authentication } = require("./middlewares/authentication.middleware");
 const PORT = process.env.PORT || 1010;
 
@@ -17,9 +18,10 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", userRouter);
-app.use("/api", authentication, categoryRouter);
+app.use("/api", categoryRouter);
 app.use("/api", productRouter);
 app.use("/api", authentication, cartRouter);
+app.use("/api", authentication, orderRouter);
 
 (async () => {
   try {

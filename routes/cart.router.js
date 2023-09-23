@@ -84,6 +84,9 @@ cartRouter.post("/add-to-cart/:productId", async (req, res) => {
 
     return res.status(200).json({ message: "Item added to cart." });
   } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ error: "Invalid product ID." });
+    }
     console.log(error);
     res
       .status(500)
@@ -95,27 +98,9 @@ cartRouter.get("/cart", async (req, res) => {
   try {
     const userId = new mongoose.Types.ObjectId(req.user);
 
-    const userCart = await CartModel.aggregate([
-      { $match: { user: userId } },
-      { $unwind: "$items" },
-      {
-        $lookup: {
-          from: "products",
-          localField: "items.product",
-          foreignField: "_id",
-          as: "product_info",
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          totalQuantity: 1,
-          totalPrice: 1,
-          items: 1,
-          product_info: { $arrayElemAt: ["$product_info", 0] },
-        },
-      },
-    ]);
+    const userCart = await CartModel.find({ user: userId }).populate(
+      "items.product"
+    );
 
     if (userCart.length === 0)
       return res.status(204).json({ message: "Cart is empty." });
