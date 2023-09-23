@@ -64,9 +64,7 @@ Our backend leverages the following technologies to provide a secure and scalabl
    TOKEN_EXPIRY = token_expiry_time
    ```
 
-### Running the Server
-
-1. **Start the backend server**
+4. **Start the backend server**
 
    ```shell
    node index.js
@@ -77,7 +75,8 @@ Our backend leverages the following technologies to provide a secure and scalabl
    ```
 
 ### Swagger Docs
-[Docs link](http://localhost:1010/api-docs/#/)
+
+[API Docs](https://red-light-bee.cyclic.cloud/api-docs/)
 
 ### Contact Information
 
