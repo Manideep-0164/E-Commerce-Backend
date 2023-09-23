@@ -74,7 +74,6 @@ Start the backend server:
     nodemon index.js
     # or
     npm run start
-    ```
 
 ### Contact Information
 
