@@ -76,6 +76,9 @@ Our backend leverages the following technologies to provide a secure and scalabl
    npm run start
    ```
 
+### Swagger Docs
+[Docs link](http://localhost:1010/api-docs/#/)
+
 ### Contact Information
 
 For any queries and feedback, please contact me at [peddaboinimanideep03@gmail.com](mailto:peddaboinimanideep03@gmail.com).
