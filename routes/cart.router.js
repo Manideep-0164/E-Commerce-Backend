@@ -189,6 +189,9 @@ cartRouter.patch("/update-quantity/:productId", async (req, res) => {
 
     return res.status(200).json({ message: "Cart quantity updated." });
   } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ error: "Invalid product ID." });
+    }
     console.error("Error updating cart quantity:", error);
     res
       .status(500)
@@ -231,7 +234,6 @@ cartRouter.delete("/delete-item/:productId", async (req, res) => {
     if (isProductExists.availability === "Out of Stock") {
       isProductExists.availability = "In Stock";
     }
-    await isProductExists.save();
 
     const updatedCartItems = userCart.items.filter(
       (item, ind) => item.product.toString() !== productId
@@ -244,10 +246,14 @@ cartRouter.delete("/delete-item/:productId", async (req, res) => {
     userCart.totalPrice -= cartItemTotalPrice;
     userCart.totalPrice = parseFloat(userCart.totalPrice.toFixed(2));
 
+    await isProductExists.save();
     await userCart.save();
 
     return res.status(200).json({ message: "Cart item successfully removed." });
   } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ error: "Invalid product ID." });
+    }
     console.error("Error deleting cart item:", error);
     res
       .status(500)

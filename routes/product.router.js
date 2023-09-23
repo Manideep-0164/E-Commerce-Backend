@@ -39,6 +39,9 @@ productRouter.get("/get-products/:id", async (req, res) => {
 
     res.status(200).json(products);
   } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ error: "Invalid product ID." });
+    }
     console.log("Error fetching products:", error);
     res
       .status(500)
@@ -60,6 +63,9 @@ productRouter.get("/get-product/:id", async (req, res) => {
 
     res.status(200).json(product);
   } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ error: "Invalid product ID." });
+    }
     console.log("Error fetching products:", error);
     res
       .status(500)
