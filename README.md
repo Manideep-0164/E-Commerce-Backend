@@ -66,14 +66,15 @@ Our backend leverages the following technologies to provide a secure and scalabl
 
 ### Running the Server
 
-Start the backend server:
+1. **Start the backend server**
 
-    ```shell
-    node index.js
-    # or
-    nodemon index.js
-    # or
-    npm run start
+   ```shell
+   node index.js
+   # or
+   nodemon index.js
+   # or
+   npm run start
+   ```
 
 ### Contact Information
 
