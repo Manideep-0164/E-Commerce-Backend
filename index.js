@@ -8,6 +8,8 @@ const { productRouter } = require("./routes/product.router");
 const { cartRouter } = require("./routes/cart.router");
 const { orderRouter } = require("./routes/order.router");
 const { authentication } = require("./middlewares/authentication.middleware");
+const swaggerUi = require("swagger-ui-express");
+const specs = require("./swagger");
 const PORT = process.env.PORT || 1010;
 
 app.use(cors());
@@ -17,6 +19,7 @@ app.get("/", (req, res) => {
   res.status(200).json({ message: "OK" });
 });
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.use("/api", userRouter);
 app.use("/api", categoryRouter);
 app.use("/api", productRouter);

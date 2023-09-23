@@ -1,0 +1,905 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: "E-Commerce API"
+  description: "Comprehensive API documentation for the E-Commerce platform, providing endpoints for user authentication, product management, shopping cart operations, orders, and more."
+
+servers:
+  - url: "http://localhost:1010/api"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: "apiKey"
+      name: "Authorization"
+      in: "header"
+      description: "Place your JWT token here in the format 'Bearer token' "
+
+paths:
+  /api/register:
+    post:
+      summary: Register a new user.
+      tags: [User]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: User's name.
+                email:
+                  type: string
+                  format: email
+                  description: User's email address.
+                password:
+                  type: string
+                  description: User's password.
+              example:
+                name: John Doe
+                email: john.doe@example.com
+                password: password123
+      responses:
+        201:
+          description: User successfully registered.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message.
+                    example: Successfully Registered.
+        409:
+          description: User already exists. Please login.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: User already exists. Please login.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
+
+  /api/login:
+    post:
+      summary: Log in a user and generate a JWT token.
+      tags: [User]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address.
+                password:
+                  type: string
+                  description: User's password.
+              example:
+                email: john.doe@example.com
+                password: password123
+      responses:
+        200:
+          description: Login successful. JWT token generated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message.
+                    example: Login success.
+                  token:
+                    type: string
+                    description: JWT token for authentication.
+        401:
+          description: Invalid credentials or user does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: Invalid Credentials.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
+
+  /api/cart:
+    get:
+      summary: Get the user's cart.
+      tags: [Cart]
+      security:
+        - bearerAuth: [] # Use the security definition you defined in components
+      responses:
+        200:
+          description: Successful response with the user's cart.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cart:
+                    type: object # Modify this based on your actual cart schema
+                    description: The user's cart.
+                    example:
+                      user: "user_id"
+                      items:
+                        - product: "product_id"
+                          quantity: 2
+                          price: 25.0
+                      totalQuantity: 2
+                      totalPrice: 50.0
+        204:
+          description: Cart is empty.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Informational message.
+                    example: Cart is empty.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
+
+  /api/add-to-cart/{productId}:
+    post:
+      summary: Add a product to the user's cart.
+      tags: [Cart]
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          description: ID of the product to add to the cart.
+          schema:
+            type: string
+            format: ObjectId
+            example: 5f5b5e9e92bb8a07b85b38a8
+      responses:
+        200:
+          description: Product successfully added to the cart.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message.
+                    example: Item added to cart.
+        400:
+          description: Bad request, invalid product ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Invalid product ID.
+        404:
+          description: Product not found or out of stock.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: Product not found.
+        409:
+          description: Item already in the cart.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: Item already in the cart.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
+      security:
+        - bearerAuth: []
+
+  /api/update-quantity/{productId}:
+    patch:
+      summary: Update quantity of a product in the user's cart.
+      tags: [Cart]
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          description: ID of the product to update quantity.
+          schema:
+            type: string
+            format: ObjectId
+            example: 5f5b5e9e92bb8a07b85b38a8
+      requestBody:
+        description: Action to perform on the product quantity (increase or decrease).
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [increase, decrease]
+                  description: Action to perform on the product quantity.
+                  example: increase
+      security:
+        - bearerAuth: [] # Use the security definition you defined in components
+      responses:
+        200:
+          description: Cart quantity successfully updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message.
+                    example: Cart quantity updated.
+        400:
+          description: Bad request, invalid product ID or action.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Invalid product ID or action.
+        404:
+          description: Product not found or item not found in the cart.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: Product not found or item not found in the cart.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
+
+  /api/delete-item/{productId}:
+    delete:
+      summary: Delete a product from the user's cart.
+      tags: [Cart]
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          description: ID of the product to delete from the cart.
+          schema:
+            type: string
+            format: ObjectId
+            example: 5f5b5e9e92bb8a07b85b38a8
+      security:
+        - bearerAuth: [] # Use the security definition you defined in components
+      responses:
+        200:
+          description: Cart item successfully removed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message.
+                    example: Cart item successfully removed.
+        400:
+          description: Bad request, invalid product ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Invalid product ID.
+        404:
+          description: Product not found or item not found in the cart.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: Product not found or item not found in the cart.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
+
+  /api/get-categories:
+    get:
+      summary: Get all categories.
+      tags: [Category]
+      responses:
+        200:
+          description: Categories successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                      description: Category ID.
+                    name:
+                      type: string
+                      description: Category name.
+                    description:
+                      type: string
+                      description: Category description.
+        404:
+          description: No categories found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: No categories found.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
+
+  /api/get-products/{id}:
+    get:
+      summary: Get products by category ID.
+      tags: [Product]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Category ID to filter products.
+          schema:
+            type: string
+            format: ObjectId
+            example: 5f5b5e9e92bb8a07b85b38a8
+      responses:
+        200:
+          description: Products successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                      description: Product ID.
+                    name:
+                      type: string
+                      description: Product name.
+                    description:
+                      type: string
+                      description: Product description.
+                    price:
+                      type: number
+                      description: Product price.
+                    stock:
+                      type: integer
+                      description: Product stock.
+                    availability:
+                      type: string
+                      description: Product availability (In Stock, Out of Stock).
+                    image:
+                      type: string
+                      description: Product image URL.
+        404:
+          description: No products found for the given category ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: No products found.
+        400:
+          description: Bad request, invalid category ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Invalid category ID.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
+
+  /api/get-product/{id}:
+    get:
+      summary: Get a product by ID.
+      tags: [Product]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Product ID to retrieve.
+          schema:
+            type: string
+            format: ObjectId
+            example: 5f5b5e9e92bb8a07b85b38a8
+      responses:
+        200:
+          description: Product successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    description: Product ID.
+                  name:
+                    type: string
+                    description: Product name.
+                  description:
+                    type: string
+                    description: Product description.
+                  price:
+                    type: number
+                    description: Product price.
+                  stock:
+                    type: integer
+                    description: Product stock.
+                  availability:
+                    type: string
+                    description: Product availability (In Stock, Out of Stock).
+                  image:
+                    type: string
+                    description: Product image URL.
+        404:
+          description: Product not found for the given ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: Product not found.
+        400:
+          description: Bad request, invalid product ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Invalid product ID.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
+
+  /api/place-order:
+    post:
+      summary: Place a new order.
+      tags: [Order]
+      requestBody:
+        description: Order details including address.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                address:
+                  type: object
+                  properties:
+                    street:
+                      type: string
+                      description: Street address.
+                      example: "123 Main St"
+                    city:
+                      type: string
+                      description: City.
+                      example: "Example City"
+                    state:
+                      type: string
+                      description: State or region.
+                      example: "CA"
+                    postalCode:
+                      type: string
+                      description: Postal code.
+                      example: "12345"
+                    country:
+                      type: string
+                      description: Country.
+                      example: "India"
+      security:
+        - bearerAuth: []
+      responses:
+        201:
+          description: Order successfully placed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message.
+                    example: Order placed successfully.
+        404:
+          description: Cart not found or cart is empty.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: Cart not found or cart is empty.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
+
+  /api/get-orders:
+    get:
+      summary: Get orders for the authenticated user.
+      tags: [Order]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Successful operation, returning the user's orders.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                      description: Order ID.
+                      example: 5f5b5e9e92bb8a07b85b38a8
+                    user:
+                      type: string
+                      description: User ID.
+                      example: 5f5b5e9e92bb8a07b85b38a8
+                    totalQuantity:
+                      type: integer
+                      description: Total quantity of items in the order.
+                      example: 3
+                    totalPrice:
+                      type: number
+                      description: Total price of the order.
+                      example: 50.99
+                    address:
+                      type: object
+                      properties:
+                        street:
+                          type: string
+                          description: Street address.
+                          example: "123 Main St"
+                        city:
+                          type: string
+                          description: City.
+                          example: "Example City"
+                        state:
+                          type: string
+                          description: State or region.
+                          example: "CA"
+                        postalCode:
+                          type: string
+                          description: Postal code.
+                          example: "12345"
+                        country:
+                          type: string
+                          description: Country.
+                          example: "India"
+                      description: Shipping address.
+                    status:
+                      type: string
+                      description: Order status.
+                      example: "Pending"
+                    createdAt:
+                      type: string
+                      format: date-time
+                      description: Order creation date and time.
+                      example: "2023-09-23T12:34:56Z"
+                    items:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          product:
+                            type: object
+                            properties:
+                              title:
+                                type: string
+                                description: Product title.
+                                example: "Example Product"
+                              brand:
+                                type: string
+                                description: Product brand.
+                                example: "Example Brand"
+                              price:
+                                type: number
+                                description: Product price.
+                                example: 10.99
+                              imageUrl:
+                                type: string
+                                description: URL of the product image.
+                                example: "https://example.com/product-image.jpg"
+                            description: Product details.
+                          quantity:
+                            type: integer
+                            description: Quantity of the product in the order.
+                            example: 2
+                      description: Order items.
+        404:
+          description: No orders found for the user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: No orders found.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
+
+  /api/get-order/{orderId}:
+    get:
+      summary: Get a specific order for the authenticated user.
+      tags: [Order]
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          description: ID of the order to retrieve.
+          schema:
+            type: string
+          example: 5f5b5e9e92bb8a07b85b38a8
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Successful operation, returning the order.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    description: Order ID.
+                    example: 5f5b5e9e92bb8a07b85b38a8
+                  user:
+                    type: string
+                    description: User ID.
+                    example: 5f5b5e9e92bb8a07b85b38a8
+                  totalQuantity:
+                    type: integer
+                    description: Total quantity of items in the order.
+                    example: 3
+                  totalPrice:
+                    type: number
+                    description: Total price of the order.
+                    example: 50.99
+                  address:
+                    type: object
+                    properties:
+                      street:
+                        type: string
+                        description: Street address.
+                        example: "123 Main St"
+                      city:
+                        type: string
+                        description: City.
+                        example: "Example City"
+                      state:
+                        type: string
+                        description: State or region.
+                        example: "CA"
+                      postalCode:
+                        type: string
+                        description: Postal code.
+                        example: "12345"
+                      country:
+                        type: string
+                        description: Country.
+                        example: "India"
+                    description: Shipping address.
+                  status:
+                    type: string
+                    description: Order status.
+                    example: "Pending"
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: Order creation date and time.
+                    example: "2023-09-23T12:34:56Z"
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        product:
+                          type: object
+                          properties:
+                            title:
+                              type: string
+                              description: Product title.
+                              example: "Example Product"
+                            brand:
+                              type: string
+                              description: Product brand.
+                              example: "Example Brand"
+                            price:
+                              type: number
+                              description: Product price.
+                              example: 10.99
+                            imageUrl:
+                              type: string
+                              description: URL of the product image.
+                              example: "https://example.com/product-image.jpg"
+                          description: Product details.
+                        quantity:
+                          type: integer
+                          description: Quantity of the product in the order.
+                          example: 2
+                    description: Order items.
+        404:
+          description: Order not found for the user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                    example: Order not found.
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Something went wrong. Please try again later.
